@@ -30,26 +30,25 @@ facebook_blueprint = make_facebook_blueprint(client_id="1647653595405093", clien
 app.register_blueprint(facebook_blueprint, url_prefix="/auth/facebook/wikifam")
 
 # for Google
-google_blueprint = make_google_blueprint(client_id="829398755356-9fsjod7oisuf8sn0rihoj30fk76mcfko.apps.googleusercontent.com", client_secret="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", scope=['https://www.googleapis.com/auth/userinfo.email', 'openid'])
+google_blueprint = make_google_blueprint(client_id="829398755356-9fsjod7oisuf8sn0rihoj30fk76mcfko.apps.googleusercontent.com", client_secret="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", scope=['https://www.googleapis.com/auth/userinfo.email', 'openid', 'https://www.googleapis.com/auth/userinfo.profile'])
 app.register_blueprint(google_blueprint, url_prefix="/auth")
 
 db = SQLAlchemy(app)
 
 class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(250), primary_key=True)
     name = db.Column(db.String(250), unique=False)
     email = db.Column(db.String(250), unique=True)
 
 class OAuth(OAuthConsumerMixin, db.Model):
-    user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
+    user_id = db.Column(db.String(250), db.ForeignKey(User.id), nullable=False)
     user = db.relationship(User)
 
 login_manager = LoginManager(app)
-# login_manager.login_view = 'facebook.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.query.get((user_id))
 
 # For Facebook
 facebook_blueprint.storage = SQLAlchemyStorage(OAuth, db.session, user=current_user)
@@ -69,11 +68,6 @@ def facebookLoggedIn(blueprint, token):
 
     accInfoJson = accInfo.json()
     user_id = accInfoJson["id"]
-    user_email = accInfoJson["email"]
-
-    print(type(accInfoJson["id"]))
-    print(type(accInfoJson["email"]))
-    print(type(accInfoJson["name"]))
 
     # find auth token in DBor create
     query = OAuth.query.filter_by(provider=blueprint.name, user_id=user_id)
@@ -121,6 +115,7 @@ def googleLoggedIn(blueprint, token):
         return False
 
     accInfo = blueprint.session.get('/oauth2/v1/userinfo')
+
     print("person info is: ")
     print(accInfo.json())
 
@@ -130,7 +125,6 @@ def googleLoggedIn(blueprint, token):
 
     accInfoJson = accInfo.json()
     user_id = accInfoJson["id"]
-    user_name = "coolio"
 
     # find auth token in DBor create
     query = OAuth.query.filter_by(provider=blueprint.name, user_id=user_id)
@@ -146,11 +140,7 @@ def googleLoggedIn(blueprint, token):
 
     else:
         # create local user
-        print(type(accInfoJson["id"]))
-        print(type(accInfoJson["email"]))
-        print(type(user_name))
-
-        user = User(name = user_name, id=accInfoJson["id"], email=accInfoJson["email"])
+        user = User(name = accInfoJson["name"], id=accInfoJson["id"], email=accInfoJson["email"])
         
         oauth.user = user
         
