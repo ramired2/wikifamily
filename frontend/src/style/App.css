@@ -1,0 +1,86 @@
+body {
+  font-family: 'Georgia';
+  margin-top: 100px;
+  padding: 40px;
+}
+
+/* navigation bar general container */
+.nav {
+  background-color: #f6f6f6;                      /*double check colors*/
+  display: flex;
+  position: fixed;
+  align-items: center;
+  height: 100px;
+  top: 0;
+  left: 0;
+  right: 0;
+  box-shadow: 0 0 3px 0 #3366cc;
+  z-index: 1;
+}
+
+.navLogo {
+  margin-left: 30px;
+}
+
+.nav_list {
+  list-style-type: none;
+}
+
+.nav_list * {
+  display: inline;
+}
+
+li a {
+  color: #3366cc; /* blue color */
+  font-weight: 500;
+  font-size: 20px;
+  text-decoration: none;
+  text-align: center;
+  padding: 30px 30px; /* distance btw nav bar options */
+
+}
+li a:hover {
+  text-decoration: underline;
+}
+
+/* login/sign up btns container */
+.accountContainer {
+  float: right;
+  right: 35px;
+  position: absolute;
+}
+
+/* login/sign up btns formatting */
+.accountBtns {
+  border-style: none;
+  width: 130px;
+  background-color: #f6f6f6;
+  color: black;
+  font-weight: 500;
+  font-size: 20px;
+  font-family: 'Georgia';
+}
+
+/* vertical line btw the buttons */
+.accountBtns:not(:last-child) {
+  border-right: 1px solid black;
+}
+
+.rightButton:hover, .leftButton:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* text container */
+.content {
+  margin: 25px 50px 75px;
+  padding: 50px;
+  background-color: #f6f6f6;
+  width: 75%;
+}
+.subtopic {
+  font-size: 25px;
+}
+.text {
+  color: black;                                 /*double check colors*/
+}
