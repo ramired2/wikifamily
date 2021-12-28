@@ -1,0 +1,15 @@
+<p>Flask app for logging in and tree creation functions</p>
+    
+{% if current_user.is_authenticated %}
+  You are logged in as {{ current_user.name }}!
+  <a href='{{ url_for("logout") }}'>Log out</a>
+{% else %}
+You are not logged in yet!
+<a href='{{ url_for("facebook.login") }}'>
+<img id="facebook" src="https://img.shields.io/badge/Facebook-Connect-brightgreen?style=for-the-badge&labelColor=black&logo=facebook" alt="Facebook">
+</a>
+
+<a href='{{ url_for("google.login") }}'>
+  <img id="google" src="https://raw.githubusercontent.com/react-native-community/react-native-google-signin/HEAD/img/signin-button.png" alt="Google">
+  </a>
+{% endif %}
