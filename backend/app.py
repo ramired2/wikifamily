@@ -10,6 +10,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin, SQLAlchemyStorage
 from sqlalchemy.orm.exc import NoResultFound
 
+import json
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "scrfanfaklfetkey")
@@ -26,11 +28,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/daisy/wikiFam/backend/login.db'
 
 # for Facebook
-facebook_blueprint = make_facebook_blueprint(client_id="----------", client_secret="---------")
+facebook_blueprint = make_facebook_blueprint(client_id="1647653595405093", client_secret="7bad27c3dc273670e94b219ebd5accb6")
 app.register_blueprint(facebook_blueprint, url_prefix="/auth/facebook/wikifam")
 
 # for Google
-google_blueprint = make_google_blueprint(client_id="------------", client_secret="-----------", scope=['https://www.googleapis.com/auth/userinfo.email', 'openid', 'https://www.googleapis.com/auth/userinfo.profile'])
+google_blueprint = make_google_blueprint(client_id="829398755356-9fsjod7oisuf8sn0rihoj30fk76mcfko.apps.googleusercontent.com", client_secret="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", scope=['https://www.googleapis.com/auth/userinfo.email', 'openid', 'https://www.googleapis.com/auth/userinfo.profile'])
 app.register_blueprint(google_blueprint, url_prefix="/auth")
 
 db = SQLAlchemy(app)
@@ -53,16 +55,24 @@ def load_user(user_id):
 # For Facebook
 facebook_blueprint.storage = SQLAlchemyStorage(OAuth, db.session, user=current_user)
 
-@oauth_authorized.connect_via(facebook_blueprint)
-@app.route('/name', methods=['POST'])
-def getUser():
-    return current_user.name
+# @oauth_authorized.connect_via(facebook_blueprint)
+# @app.route('/name')
+# def getUserName():
+#     return current_user.name
 
-@oauth_authorized.connect_via(facebook_blueprint)
-@app.route('/id')
-def getUserId():
-    return current_user.id
+# @oauth_authorized.connect_via(facebook_blueprint)
+# @app.route('/id')
+# def getUserId():
+#     return current_user.id
 
+# @oauth_authorized.connect_via(facebook_blueprint)
+# @app.route('/email')
+# def getUserEmail():
+#     return current_user.email
+
+@app.route('/facebook/login')
+def newLogin():
+    return redirect(url_for('facebook.login'))
 
 @oauth_authorized.connect_via(facebook_blueprint)
 def facebookLoggedIn(blueprint, token):
@@ -116,6 +126,10 @@ def facebook_error(blueprint, message, response):
 
 # For Google
 google_blueprint.storage = SQLAlchemyStorage(OAuth, db.session, user=current_user)
+
+@app.route('/google/login')
+def newLoginGoogle():
+    return redirect(url_for('google.login'))
 
 @oauth_authorized.connect_via(google_blueprint)
 def googleLoggedIn(blueprint, token):
@@ -174,20 +188,36 @@ def googleLoggedIn(blueprint, token):
 def google_error(blueprint, message, response):
     print("error oauth")
 
+# @login_required
 @app.route("/")
 @app.route("/login")
 def idx():
-    return redirect('http://localhost:5000')
-    # return render_template("temp.html")
+    # send url for login ????????
+    # return redirect('http://localhost:5000')
+    return render_template('temp.html')
+
+@app.route("/info")
+@login_required
+def getAllInfo():
+    print(current_user.name)
+    print(current_user.is_authenticated)
+    print(current_user)
+    userInfo = []
+    userInfo.append(current_user.name)
+    userInfo.append(current_user.id)
+    userInfo.append(current_user.email)
+
+    print(userInfo)
+    return json.dumps(userInfo)
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     print("logged out")
-    flash("You have logged out")
 
-    return redirect(url_for('idx'))
+    # return redirect(url_for('idx'))
+    return 'loggedOut'
 
 if __name__ == '__main__':
     db.create_all()
