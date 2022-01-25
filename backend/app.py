@@ -133,8 +133,8 @@ def newLoginGoogle():
 
 @oauth_authorized.connect_via(google_blueprint)
 def googleLoggedIn(blueprint, token):
-    print("google login stuff")
-    print(url_for("google.login"))
+    # print("google login stuff")
+    # print(url_for("google.login"))
 
     if not blueprint.authorized: 
         return redirect(url_for("google.login"))
@@ -144,8 +144,8 @@ def googleLoggedIn(blueprint, token):
 
     accInfo = blueprint.session.get('/oauth2/v1/userinfo')
 
-    print("person info is: ")
-    print(accInfo.json())
+    # print("person info is: ")
+    # print(accInfo.json())
 
     # authorization went OK, no errors
     if not accInfo.ok:
@@ -159,15 +159,20 @@ def googleLoggedIn(blueprint, token):
 
     try:
         oauth = query.one()
+        print("in the try part: ")
         print(oauth)
     except NoResultFound:
         oauth = OAuth(provider=blueprint.name, user_id=accInfoJson["id"], token=token)
+        print("in the except part: ")
+        print(oauth)
 
     if oauth.user:
+        print("User existed in the database")
         login_user(oauth.user)
 
     else:
         # create local user
+        print("created account for user")
         user = User(name = accInfoJson["name"], id=accInfoJson["id"], email=accInfoJson["email"])
         
         oauth.user = user
@@ -176,7 +181,7 @@ def googleLoggedIn(blueprint, token):
         db.session.commit()
         
         login_user(user)
-        print("success logged in")
+        # print("success logged in")
 
     print("curr user is ")
     print(current_user)
@@ -190,11 +195,21 @@ def google_error(blueprint, message, response):
 
 # @login_required
 @app.route("/")
-@app.route("/login")
+@app.route("/login", methods=['GET','POST'])
 def idx():
     # send url for login ????????
     # return redirect('http://localhost:5000')
-    return render_template('temp.html')
+    if current_user.is_authenticated:
+        userInfo = []
+        userInfo.append(current_user.name)
+        userInfo.append(current_user.id)
+        userInfo.append(current_user.email)
+
+        print(userInfo)
+        return json.dumps(userInfo)
+    else:
+    # return render_template('temp.html')
+        return "NotLoggedIn"
 
 @app.route("/info")
 @login_required
